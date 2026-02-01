@@ -180,6 +180,52 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(f"RCON error: {e}")
 
+    @cs_group.command(name="sandbox", description="Mode entrainement grenades (temps infini, trajectoires)")
+    @has_allowed_role()
+    async def cs_sandbox(self, interaction: discord.Interaction):
+        """Mode entrainement grenades."""
+        await interaction.response.defer()
+
+        logger.info(f"User {interaction.user} switching to sandbox mode")
+
+        # Practice mode settings
+        commands = [
+            "sv_cheats 1",
+            "bot_kick",
+            "mp_limitteams 0",
+            "mp_autoteambalance 0",
+            "mp_roundtime 60",
+            "mp_roundtime_defuse 60",
+            "mp_freezetime 0",
+            "mp_warmup_end",
+            "sv_infinite_ammo 1",
+            "ammo_grenade_limit_total 5",
+            "sv_grenade_trajectory 1",
+            "sv_grenade_trajectory_time 10",
+            "sv_grenade_trajectory_prac_pipreview 1",
+            "mp_buytime 9999",
+            "mp_buy_anywhere 1",
+            "mp_maxmoney 60000",
+            "mp_startmoney 60000",
+            "mp_restartgame 1",
+        ]
+
+        try:
+            await self._rcon("; ".join(commands))
+            await interaction.followup.send(
+                "Mode **Sandbox** active.\n"
+                "- Temps infini\n"
+                "- Grenades illimitees\n"
+                "- Trajectoires visibles\n"
+                "- Preview d'impact active"
+            )
+        except RCONAuthError:
+            await interaction.followup.send("RCON authentication failed.")
+        except RCONConnectionError as e:
+            await interaction.followup.send(f"Connection error: {e}")
+        except RCONError as e:
+            await interaction.followup.send(f"RCON error: {e}")
+
     @cs_group.command(name="status", description="Afficher les infos du serveur et les joueurs connectés")
     @has_allowed_role()
     async def cs_status(self, interaction: discord.Interaction):
