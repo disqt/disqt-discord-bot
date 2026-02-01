@@ -63,14 +63,21 @@ class CS2Bot(commands.Bot):
             map_match = re.search(r"\[1:\s+(\S+)\s+\|", status)
             map_name = map_match.group(1) if map_match else "?"
 
-            # Parse player count (e.g., "players  : 0 humans, 0 bots (10 max)")
-            players_match = re.search(r"players\s+:\s+(\d+)\s+humans,\s+\d+\s+bots\s+\((\d+)\s+max\)", status)
-            if players_match:
-                humans = int(players_match.group(1))
-                max_players = int(players_match.group(2))
-                player_str = f"{humans}/{max_players}"
-            else:
-                player_str = "?/?"
+            # Parse player count
+            players_match = re.search(r"players\s+:\s+(\d+)\s+humans", status)
+            humans = int(players_match.group(1)) if players_match else 0
+
+            # Get max players from sv_visiblemaxplayers
+            maxplayers_response = await execute_rcon(
+                config.CS2_RCON_HOST,
+                config.CS2_RCON_PORT,
+                config.CS2_RCON_PASSWORD,
+                "sv_visiblemaxplayers"
+            )
+            maxplayers_match = re.search(r"=\s*(\d+)", maxplayers_response)
+            max_players = int(maxplayers_match.group(1)) if maxplayers_match else 10
+
+            player_str = f"{humans}/{max_players}"
 
             # Build presence string: de_dust2 (2/10)
             presence_text = f"{map_name} ({player_str})"
