@@ -180,7 +180,7 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(f"RCON error: {e}")
 
-    @cs_group.command(name="sandbox", description="Mode entrainement grenades (temps infini, trajectoires)")
+    @cs_group.command(name="sandbox", description="Mode entraînement sandbox (temps infini, trajectoires)")
     @has_allowed_role()
     async def cs_sandbox(self, interaction: discord.Interaction):
         """Mode entrainement grenades."""
@@ -213,9 +213,9 @@ class CS2Commands(commands.Cog):
         try:
             await self._rcon("; ".join(commands))
             await interaction.followup.send(
-                "Mode **Sandbox** active.\n"
+                "Mode **Sandbox** activé.\n"
                 "- Temps infini\n"
-                "- Grenades illimitees\n"
+                "- Grenades illimitées\n"
                 "- Trajectoires visibles\n"
                 "- Preview d'impact active"
             )
