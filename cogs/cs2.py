@@ -50,11 +50,11 @@ class CS2Commands(commands.Cog):
 
     cs_group = app_commands.Group(name="cs", description="Commandes du serveur CS2 Disqt")
 
-    @cs_group.command(name="exec", description="Executer une commande console sur le serveur")
+    @cs_group.command(name="exec", description="Exécuter une commande console sur le serveur")
     @has_allowed_role()
     @app_commands.describe(command="Commande console (ex: sv_cheats 1, mp_restartgame 1)")
     async def cs_exec(self, interaction: discord.Interaction, command: str):
-        """Executer une commande console sur le serveur."""
+        """Exécuter une commande console sur le serveur."""
         await interaction.response.defer()
 
         logger.info(f"User {interaction.user} executing: {command}")
@@ -68,7 +68,7 @@ class CS2Commands(commands.Cog):
                     response = response[:1900] + "\n... (truncated)"
                 await interaction.followup.send(f"```\n{response}\n```")
             else:
-                await interaction.followup.send("Command executed (no response).")
+                await interaction.followup.send("Commande exécutée.")
 
         except RCONAuthError:
             await interaction.followup.send("RCON authentication failed.")
@@ -154,7 +154,7 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("game_type 0; game_mode 1; mp_restartgame 1")
-            await interaction.followup.send("Mode **Compétitif** active.")
+            await interaction.followup.send("Mode **Compétitif** activé.")
         except RCONAuthError:
             await interaction.followup.send("RCON authentication failed.")
         except RCONConnectionError as e:
@@ -183,7 +183,7 @@ class CS2Commands(commands.Cog):
     @cs_group.command(name="sandbox", description="Mode entraînement sandbox (temps infini, trajectoires)")
     @has_allowed_role()
     async def cs_sandbox(self, interaction: discord.Interaction):
-        """Mode entrainement grenades."""
+        """Mode entraînement grenades."""
         await interaction.response.defer()
 
         logger.info(f"User {interaction.user} switching to sandbox mode")
@@ -217,7 +217,7 @@ class CS2Commands(commands.Cog):
                 "- Temps infini\n"
                 "- Grenades illimitées\n"
                 "- Trajectoires visibles\n"
-                "- Preview d'impact active"
+                "- Preview d'impact activée"
             )
         except RCONAuthError:
             await interaction.followup.send("RCON authentication failed.")
@@ -229,7 +229,7 @@ class CS2Commands(commands.Cog):
     @cs_group.command(name="status", description="Afficher les infos du serveur et les joueurs connectés")
     @has_allowed_role()
     async def cs_status(self, interaction: discord.Interaction):
-        """Afficher les infos du serveur et les joueurs connectes."""
+        """Afficher les infos du serveur et les joueurs connectés."""
         await interaction.response.defer()
 
         try:
@@ -258,7 +258,7 @@ class CS2Commands(commands.Cog):
 
     @bot_group.command(name="add", description="Ajouter des bots IA pour jouer")
     @has_allowed_role()
-    @app_commands.describe(count="Nombre de bots (1-10, defaut: 1)")
+    @app_commands.describe(count="Nombre de bots (1-10, défaut: 1)")
     async def bot_add(self, interaction: discord.Interaction, count: Optional[int] = 1):
         """Ajouter des bots IA pour jouer."""
         await interaction.response.defer()
@@ -271,7 +271,7 @@ class CS2Commands(commands.Cog):
             for _ in range(count):
                 await self._rcon("bot_add")
 
-            await interaction.followup.send(f"Added **{count}** bot(s).")
+            await interaction.followup.send(f"**{count}** bot(s) ajouté(s).")
         except RCONAuthError:
             await interaction.followup.send("RCON authentication failed.")
         except RCONConnectionError as e:
@@ -289,7 +289,7 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("bot_kick")
-            await interaction.followup.send("Tous les bots ont ete vires.")
+            await interaction.followup.send("Tous les bots ont été virés.")
         except RCONAuthError:
             await interaction.followup.send("RCON authentication failed.")
         except RCONConnectionError as e:
@@ -307,7 +307,7 @@ class CS2Commands(commands.Cog):
         app_commands.Choice(name="Expert", value=3),
     ])
     async def bot_difficulty(self, interaction: discord.Interaction, level: app_commands.Choice[int]):
-        """Changer la difficulte des bots."""
+        """Changer la difficulté des bots."""
         await interaction.response.defer()
 
         logger.info(f"User {interaction.user} setting bot difficulty to {level.name}")

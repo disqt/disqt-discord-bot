@@ -1,11 +1,13 @@
 import asyncio
 import logging
+import re
 import sys
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 import config
+from rcon import execute_rcon, RCONError
 
 # Configure logging
 logging.basicConfig(
@@ -41,6 +43,60 @@ class CS2Bot(commands.Bot):
     async def on_ready(self):
         logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
         logger.info(f"Connected to {len(self.guilds)} guild(s)")
+
+        # Start the presence update loop
+        if not self.update_presence.is_running():
+            self.update_presence.start()
+
+    @tasks.loop(seconds=30)
+    async def update_presence(self):
+        """Update bot presence with server status."""
+        try:
+            status = await execute_rcon(
+                config.CS2_RCON_HOST,
+                config.CS2_RCON_PORT,
+                config.CS2_RCON_PASSWORD,
+                "status"
+            )
+
+            # Parse map name
+            map_match = re.search(r"map\s+:\s+(\S+)", status)
+            map_name = map_match.group(1) if map_match else "?"
+
+            # Parse player count (e.g., "players : 3 humans, 2 bots (10/0 max)")
+            players_match = re.search(r"players\s+:\s+(\d+)\s+humans,\s+(\d+)\s+bots\s+\((\d+)/\d+\s+max\)", status)
+            if players_match:
+                humans = int(players_match.group(1))
+                max_players = int(players_match.group(3))
+                player_str = f"{humans}/{max_players}"
+            else:
+                player_str = "?/?"
+
+            # Build presence string: de_dust2 (2/10)
+            presence_text = f"{map_name} ({player_str})"
+
+            await self.change_presence(
+                activity=discord.Activity(
+                    type=discord.ActivityType.playing,
+                    name=presence_text
+                )
+            )
+
+        except RCONError as e:
+            logger.warning(f"Failed to update presence: {e}")
+            await self.change_presence(
+                activity=discord.Activity(
+                    type=discord.ActivityType.playing,
+                    name="Hors ligne"
+                )
+            )
+        except Exception as e:
+            logger.error(f"Presence update error: {e}")
+
+    @update_presence.before_loop
+    async def before_update_presence(self):
+        """Wait until bot is ready before starting presence updates."""
+        await self.wait_until_ready()
 
 
 async def main():
