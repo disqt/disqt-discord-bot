@@ -118,7 +118,61 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("exec 1v1")
-            await interaction.followup.send("Executed **1v1** config.")
+            await interaction.followup.send("Config **1v1** chargee.")
+        except RCONAuthError:
+            await interaction.followup.send("RCON authentication failed.")
+        except RCONConnectionError as e:
+            await interaction.followup.send(f"Connection error: {e}")
+        except RCONError as e:
+            await interaction.followup.send(f"RCON error: {e}")
+
+    @cs_group.command(name="wingman", description="Passer en mode Wingman (2v2)")
+    @has_allowed_role()
+    async def cs_wingman(self, interaction: discord.Interaction):
+        """Passer en mode Wingman."""
+        await interaction.response.defer()
+
+        logger.info(f"User {interaction.user} switching to wingman mode")
+
+        try:
+            await self._rcon("game_type 0; game_mode 2; mp_restartgame 1")
+            await interaction.followup.send("Mode **Wingman** active.")
+        except RCONAuthError:
+            await interaction.followup.send("RCON authentication failed.")
+        except RCONConnectionError as e:
+            await interaction.followup.send(f"Connection error: {e}")
+        except RCONError as e:
+            await interaction.followup.send(f"RCON error: {e}")
+
+    @cs_group.command(name="competitive", description="Passer en mode Competitive (5v5)")
+    @has_allowed_role()
+    async def cs_competitive(self, interaction: discord.Interaction):
+        """Passer en mode Competitive."""
+        await interaction.response.defer()
+
+        logger.info(f"User {interaction.user} switching to competitive mode")
+
+        try:
+            await self._rcon("game_type 0; game_mode 1; mp_restartgame 1")
+            await interaction.followup.send("Mode **Competitive** active.")
+        except RCONAuthError:
+            await interaction.followup.send("RCON authentication failed.")
+        except RCONConnectionError as e:
+            await interaction.followup.send(f"Connection error: {e}")
+        except RCONError as e:
+            await interaction.followup.send(f"RCON error: {e}")
+
+    @cs_group.command(name="ffa", description="Passer en mode FFA Deathmatch (tous contre tous)")
+    @has_allowed_role()
+    async def cs_ffa(self, interaction: discord.Interaction):
+        """Passer en mode FFA Deathmatch."""
+        await interaction.response.defer()
+
+        logger.info(f"User {interaction.user} switching to FFA mode")
+
+        try:
+            await self._rcon("game_type 1; game_mode 2; mp_teammates_are_enemies 1; mp_restartgame 1")
+            await interaction.followup.send("Mode **FFA Deathmatch** active.")
         except RCONAuthError:
             await interaction.followup.send("RCON authentication failed.")
         except RCONConnectionError as e:
@@ -189,7 +243,32 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("bot_kick")
-            await interaction.followup.send("Kicked all bots.")
+            await interaction.followup.send("Tous les bots ont ete vires.")
+        except RCONAuthError:
+            await interaction.followup.send("RCON authentication failed.")
+        except RCONConnectionError as e:
+            await interaction.followup.send(f"Connection error: {e}")
+        except RCONError as e:
+            await interaction.followup.send(f"RCON error: {e}")
+
+    @bot_group.command(name="difficulty", description="Changer la difficulte des bots")
+    @has_allowed_role()
+    @app_commands.describe(level="Niveau de difficulte")
+    @app_commands.choices(level=[
+        app_commands.Choice(name="Facile", value=0),
+        app_commands.Choice(name="Normal", value=1),
+        app_commands.Choice(name="Difficile", value=2),
+        app_commands.Choice(name="Expert", value=3),
+    ])
+    async def bot_difficulty(self, interaction: discord.Interaction, level: app_commands.Choice[int]):
+        """Changer la difficulte des bots."""
+        await interaction.response.defer()
+
+        logger.info(f"User {interaction.user} setting bot difficulty to {level.name}")
+
+        try:
+            await self._rcon(f"bot_difficulty {level.value}")
+            await interaction.followup.send(f"Difficulte des bots: **{level.name}**")
         except RCONAuthError:
             await interaction.followup.send("RCON authentication failed.")
         except RCONConnectionError as e:
