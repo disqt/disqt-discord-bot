@@ -48,13 +48,13 @@ class CS2Commands(commands.Cog):
             command
         )
 
-    cs_group = app_commands.Group(name="cs", description="CS2 server commands")
+    cs_group = app_commands.Group(name="cs", description="Commandes du serveur CS2 Disqt")
 
-    @cs_group.command(name="exec")
+    @cs_group.command(name="exec", description="Executer une commande console sur le serveur")
     @has_allowed_role()
-    @app_commands.describe(command="The RCON command to execute")
+    @app_commands.describe(command="Commande console (ex: sv_cheats 1, mp_restartgame 1)")
     async def cs_exec(self, interaction: discord.Interaction, command: str):
-        """Execute a raw RCON command on the CS2 server."""
+        """Executer une commande console sur le serveur."""
         await interaction.response.defer()
 
         logger.info(f"User {interaction.user} executing: {command}")
@@ -77,11 +77,11 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(f"RCON error: {e}")
 
-    @cs_group.command(name="map")
+    @cs_group.command(name="map", description="Changer la map actuelle")
     @has_allowed_role()
-    @app_commands.describe(map_name="Map name or Steam Workshop URL")
+    @app_commands.describe(map_name="Nom de map (de_dust2, de_mirage) ou URL Steam Workshop")
     async def cs_map(self, interaction: discord.Interaction, map_name: str):
-        """Change the current map. Supports map names and Workshop URLs."""
+        """Changer la map actuelle."""
         await interaction.response.defer()
 
         # Check if it's a workshop URL
@@ -108,10 +108,10 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(f"RCON error: {e}")
 
-    @cs_group.command(name="1v1")
+    @cs_group.command(name="1v1", description="Charger la config 1v1 (warmup, overtime, etc.)")
     @has_allowed_role()
     async def cs_1v1(self, interaction: discord.Interaction):
-        """Switch to 1v1 mode configuration."""
+        """Charger la config 1v1."""
         await interaction.response.defer()
 
         logger.info(f"User {interaction.user} switching to 1v1 mode")
@@ -126,10 +126,10 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(f"RCON error: {e}")
 
-    @cs_group.command(name="status")
+    @cs_group.command(name="status", description="Afficher les infos du serveur et les joueurs connectés")
     @has_allowed_role()
     async def cs_status(self, interaction: discord.Interaction):
-        """Show CS2 server status."""
+        """Afficher les infos du serveur et les joueurs connectes."""
         await interaction.response.defer()
 
         try:
@@ -152,15 +152,15 @@ class CS2Commands(commands.Cog):
     # Bot subcommand group
     bot_group = app_commands.Group(
         name="bot",
-        description="Bot management commands",
+        description="Gestion des bots IA",
         parent=cs_group
     )
 
-    @bot_group.command(name="add")
+    @bot_group.command(name="add", description="Ajouter des bots IA pour jouer")
     @has_allowed_role()
-    @app_commands.describe(count="Number of bots to add (default: 1)")
+    @app_commands.describe(count="Nombre de bots (1-10, defaut: 1)")
     async def bot_add(self, interaction: discord.Interaction, count: Optional[int] = 1):
-        """Add bots to the server."""
+        """Ajouter des bots IA pour jouer."""
         await interaction.response.defer()
 
         count = max(1, min(count, 10))  # Clamp between 1 and 10
@@ -179,10 +179,10 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(f"RCON error: {e}")
 
-    @bot_group.command(name="kick")
+    @bot_group.command(name="kick", description="Virer tous les bots du serveur")
     @has_allowed_role()
     async def bot_kick(self, interaction: discord.Interaction):
-        """Kick all bots from the server."""
+        """Virer tous les bots du serveur."""
         await interaction.response.defer()
 
         logger.info(f"User {interaction.user} kicking all bots")
