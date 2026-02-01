@@ -59,15 +59,15 @@ class CS2Bot(commands.Bot):
                 "status"
             )
 
-            # Parse map name
-            map_match = re.search(r"map\s+:\s+(\S+)", status)
+            # Parse map name from spawngroup (e.g., "[1: de_nuke | main lump")
+            map_match = re.search(r"\[1:\s+(\S+)\s+\|", status)
             map_name = map_match.group(1) if map_match else "?"
 
-            # Parse player count (e.g., "players : 3 humans, 2 bots (10/0 max)")
-            players_match = re.search(r"players\s+:\s+(\d+)\s+humans,\s+(\d+)\s+bots\s+\((\d+)/\d+\s+max\)", status)
+            # Parse player count (e.g., "players  : 0 humans, 0 bots (10 max)")
+            players_match = re.search(r"players\s+:\s+(\d+)\s+humans,\s+\d+\s+bots\s+\((\d+)\s+max\)", status)
             if players_match:
                 humans = int(players_match.group(1))
-                max_players = int(players_match.group(3))
+                max_players = int(players_match.group(2))
                 player_str = f"{humans}/{max_players}"
             else:
                 player_str = "?/?"
