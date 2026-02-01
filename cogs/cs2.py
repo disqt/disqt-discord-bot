@@ -126,7 +126,7 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(f"RCON error: {e}")
 
-    @cs_group.command(name="status", description="Afficher les infos du serveur et les joueurs connectes")
+    @cs_group.command(name="status", description="Afficher les infos du serveur et les joueurs connectés")
     @has_allowed_role()
     async def cs_status(self, interaction: discord.Interaction):
         """Afficher les infos du serveur et les joueurs connectes."""
