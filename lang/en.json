@@ -13,5 +13,6 @@
   "error_rcon_auth": "RCON authentication failed.",
   "error_rcon_connection": "Connection error: {error}",
   "error_rcon": "RCON error: {error}",
-  "error_no_status": "No status response received."
+  "error_no_status": "No status response received.",
+  "error_map_not_found": "Map **{map}** not found on server."
 }
