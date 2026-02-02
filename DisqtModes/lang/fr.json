@@ -1,0 +1,40 @@
+{
+  "prefix": "[Disqt]",
+
+  "mode_competitive": "Mode Compétitif activé",
+  "mode_ffa": "Mode FFA Deathmatch activé",
+  "mode_arena": "Mode Arena activé",
+  "mode_gungame": "Mode Arms Race activé",
+  "mode_sandbox": "Mode Sandbox activé",
+
+  "modifier_headshot_on": "Headshot only: ON",
+  "modifier_headshot_off": "Headshot only: OFF",
+  "modifier_pistol_on": "Pistol only: ON",
+  "modifier_pistol_off": "Pistol only: OFF",
+  "modifier_vampire_on": "Vampire: ON (+25HP par kill)",
+  "modifier_vampire_off": "Vampire: OFF",
+  "modifier_ammo_on": "Munitions illimitées: ON",
+  "modifier_ammo_off": "Munitions illimitées: OFF",
+
+  "vampire_heal": "+25 HP (vampire)",
+
+  "bots_added": "{count} bot(s) ajouté(s)",
+  "bots_kicked": "Tous les bots virés",
+  "bots_difficulty": "Difficulté bots: {level}",
+
+  "tip_headshot": "Astuce: !headshot active le mode headshot only",
+  "tip_pistol": "Astuce: !pistol désactive les armes principales",
+  "tip_vampire": "Astuce: !vampire te soigne 25HP à chaque kill",
+  "tip_ammo": "Astuce: !ammo active les munitions illimitées",
+  "tip_modes": "Astuce: Change de mode avec !ffa !arena !competitive !gungame",
+  "tip_bots": "Astuce: !bot add 5 ajoute 5 bots, !bot kick les vire",
+  "tip_sandbox": "Astuce: !sandbox pour t'entraîner aux grenades",
+  "tip_help": "Astuce: !help pour voir toutes les commandes",
+
+  "welcome": "Bienvenue! Tape !help pour voir les commandes disponibles.",
+
+  "help_title": "=== Commandes disponibles ===",
+  "help_modes": "Modes: !competitive !ffa !arena !gungame !sandbox",
+  "help_modifiers": "Modifiers: !headshot !pistol !vampire !ammo",
+  "help_bots": "Bots: !bot add [n] | !bot kick | !bot difficulty [0-3]"
+}
