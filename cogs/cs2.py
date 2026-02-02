@@ -68,14 +68,14 @@ class CS2Commands(commands.Cog):
                     response = response[:1900] + "\n... (truncated)"
                 await interaction.followup.send(f"```\n{response}\n```")
             else:
-                await interaction.followup.send("Commande exécutée.")
+                await interaction.followup.send(self.bot.lang["command_executed"])
 
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @cs_group.command(name="map", description="Changer la map actuelle")
     @has_allowed_role()
@@ -100,13 +100,13 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon(command)
-            await interaction.followup.send(f"Changement de map vers **{map_display}**...")
+            await interaction.followup.send(self.bot.lang["map_changing"].format(map=map_display))
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @cs_group.command(name="competitive", description="Passer en mode Compétitif (5v5)")
     @has_allowed_role()
@@ -118,13 +118,13 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("game_type 0; game_mode 1; mp_restartgame 1")
-            await interaction.followup.send("Mode **Compétitif** activé.")
+            await interaction.followup.send(self.bot.lang["mode_competitive"])
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @cs_group.command(name="arena", description="Mode Arena (1v1, 2v2, etc.) - pas de limite de temps")
     @has_allowed_role()
@@ -151,18 +151,13 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("; ".join(commands))
-            await interaction.followup.send(
-                "Mode **Arena** activé.\n"
-                "- Pas de limite de temps\n"
-                "- Argent max\n"
-                "- Armure + casque gratuits"
-            )
+            await interaction.followup.send(self.bot.lang["mode_arena"])
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @cs_group.command(name="gungame", description="Mode Arms Race (gungame)")
     @has_allowed_role()
@@ -175,13 +170,13 @@ class CS2Commands(commands.Cog):
         try:
             # Arms Race: game_type 1, game_mode 0
             await self._rcon("game_type 1; game_mode 0; mp_restartgame 1")
-            await interaction.followup.send("Mode **Arms Race (Gungame)** activé.")
+            await interaction.followup.send(self.bot.lang["mode_gungame"])
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @cs_group.command(name="retake", description="Mode Retake (CTs reprennent le site)")
     @has_allowed_role()
@@ -193,17 +188,13 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("mp_warmup_end; css_retakes_enabled 1")
-            await interaction.followup.send(
-                "Mode **Retake** activé.\n"
-                "- CTs reprennent le site\n"
-                "- Équipes aléatoires chaque round"
-            )
+            await interaction.followup.send(self.bot.lang["mode_retake"])
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @cs_group.command(name="ffa", description="Mode FFA Deathmatch (chacun pour soi)")
     @has_allowed_role()
@@ -232,18 +223,13 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("; ".join(commands))
-            await interaction.followup.send(
-                "Mode **FFA Deathmatch** activé.\n"
-                "- Chacun pour soi\n"
-                "- Respawn instantané\n"
-                "- Munitions illimitées"
-            )
+            await interaction.followup.send(self.bot.lang["mode_ffa"])
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @cs_group.command(name="sandbox", description="Mode entraînement sandbox (temps infini, trajectoires)")
     @has_allowed_role()
@@ -277,19 +263,13 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("; ".join(commands))
-            await interaction.followup.send(
-                "Mode **Sandbox** activé.\n"
-                "- Temps infini\n"
-                "- Grenades illimitées\n"
-                "- Trajectoires visibles\n"
-                "- Preview d'impact activée"
-            )
+            await interaction.followup.send(self.bot.lang["mode_sandbox"])
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @cs_group.command(name="status", description="Afficher les infos du serveur et les joueurs connectés")
     @has_allowed_role()
@@ -305,14 +285,14 @@ class CS2Commands(commands.Cog):
                     response = response[:1900] + "\n... (truncated)"
                 await interaction.followup.send(f"```\n{response}\n```")
             else:
-                await interaction.followup.send("No status response received.")
+                await interaction.followup.send(self.bot.lang["error_no_status"])
 
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     # Bot subcommand group
     bot_group = app_commands.Group(
@@ -336,13 +316,13 @@ class CS2Commands(commands.Cog):
             for _ in range(count):
                 await self._rcon("bot_add")
 
-            await interaction.followup.send(f"**{count}** bot(s) ajouté(s).")
+            await interaction.followup.send(self.bot.lang["bots_added"].format(count=count))
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @bot_group.command(name="kick", description="Virer tous les bots du serveur")
     @has_allowed_role()
@@ -354,13 +334,13 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon("bot_kick")
-            await interaction.followup.send("Tous les bots ont été virés.")
+            await interaction.followup.send(self.bot.lang["bots_kicked"])
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
     @bot_group.command(name="difficulty", description="Changer la difficulté des bots")
     @has_allowed_role()
@@ -379,13 +359,13 @@ class CS2Commands(commands.Cog):
 
         try:
             await self._rcon(f"bot_difficulty {level.value}")
-            await interaction.followup.send(f"Difficulté des bots: **{level.name}**")
+            await interaction.followup.send(self.bot.lang["bots_difficulty"].format(level=level.name))
         except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
         except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
         except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
 
 async def setup(bot: commands.Bot):
