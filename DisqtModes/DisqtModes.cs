@@ -19,7 +19,7 @@ public class DisqtModes : BasePlugin
 
     public override void Load(bool hotReload)
     {
-        Logger.LogInformation("DisqtModes loaded!");
+        Console.WriteLine("[DisqtModes] Plugin loaded!");
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
     }
