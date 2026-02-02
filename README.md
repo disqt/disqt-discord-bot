@@ -65,11 +65,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=steam
-WorkingDirectory=/home/steam/disqt-bot
+User=cs
+WorkingDirectory=/home/cs/disqt-bot
 ExecStart=/usr/bin/python3 bot.py
 Restart=always
-EnvironmentFile=/home/steam/disqt-bot/.env
 
 [Install]
 WantedBy=multi-user.target
