@@ -108,42 +108,6 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(f"RCON error: {e}")
 
-    @cs_group.command(name="1v1", description="Charger la config 1v1 (warmup, overtime, etc.)")
-    @has_allowed_role()
-    async def cs_1v1(self, interaction: discord.Interaction):
-        """Charger la config 1v1."""
-        await interaction.response.defer()
-
-        logger.info(f"User {interaction.user} switching to 1v1 mode")
-
-        try:
-            await self._rcon("exec 1v1")
-            await interaction.followup.send("Config **1v1** chargée.")
-        except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
-        except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
-        except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
-
-    @cs_group.command(name="wingman", description="Passer en mode Wingman (2v2)")
-    @has_allowed_role()
-    async def cs_wingman(self, interaction: discord.Interaction):
-        """Passer en mode Wingman."""
-        await interaction.response.defer()
-
-        logger.info(f"User {interaction.user} switching to wingman mode")
-
-        try:
-            await self._rcon("game_type 0; game_mode 2; mp_restartgame 1")
-            await interaction.followup.send("Mode **Wingman** activé.")
-        except RCONAuthError:
-            await interaction.followup.send("RCON authentication failed.")
-        except RCONConnectionError as e:
-            await interaction.followup.send(f"Connection error: {e}")
-        except RCONError as e:
-            await interaction.followup.send(f"RCON error: {e}")
-
     @cs_group.command(name="competitive", description="Passer en mode Compétitif (5v5)")
     @has_allowed_role()
     async def cs_competitive(self, interaction: discord.Interaction):
@@ -162,17 +126,118 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(f"RCON error: {e}")
 
-    @cs_group.command(name="ffa", description="Passer en mode FFA Deathmatch (chacun pour soi)")
+    @cs_group.command(name="arena", description="Mode Arena (1v1, 2v2, etc.) - pas de limite de temps")
+    @has_allowed_role()
+    async def cs_arena(self, interaction: discord.Interaction):
+        """Mode Arena pour duels."""
+        await interaction.response.defer()
+
+        logger.info(f"User {interaction.user} switching to arena mode")
+
+        # Arena: no time limit (60 min), full money, free armor, ends on elimination
+        commands = [
+            "game_type 0",
+            "game_mode 1",
+            "mp_maxrounds 30",
+            "mp_roundtime 60",
+            "mp_roundtime_defuse 60",
+            "mp_freezetime 3",
+            "mp_buytime 15",
+            "mp_startmoney 16000",
+            "mp_maxmoney 16000",
+            "mp_free_armor 2",
+            "mp_restartgame 1",
+        ]
+
+        try:
+            await self._rcon("; ".join(commands))
+            await interaction.followup.send(
+                "Mode **Arena** activé.\n"
+                "- Pas de limite de temps\n"
+                "- Argent max\n"
+                "- Armure + casque gratuits"
+            )
+        except RCONAuthError:
+            await interaction.followup.send("RCON authentication failed.")
+        except RCONConnectionError as e:
+            await interaction.followup.send(f"Connection error: {e}")
+        except RCONError as e:
+            await interaction.followup.send(f"RCON error: {e}")
+
+    @cs_group.command(name="gungame", description="Mode Arms Race (gungame)")
+    @has_allowed_role()
+    async def cs_gungame(self, interaction: discord.Interaction):
+        """Mode Arms Race / Gungame."""
+        await interaction.response.defer()
+
+        logger.info(f"User {interaction.user} switching to gungame mode")
+
+        try:
+            # Arms Race: game_type 1, game_mode 0
+            await self._rcon("game_type 1; game_mode 0; mp_restartgame 1")
+            await interaction.followup.send("Mode **Arms Race (Gungame)** activé.")
+        except RCONAuthError:
+            await interaction.followup.send("RCON authentication failed.")
+        except RCONConnectionError as e:
+            await interaction.followup.send(f"Connection error: {e}")
+        except RCONError as e:
+            await interaction.followup.send(f"RCON error: {e}")
+
+    @cs_group.command(name="retake", description="Mode Retake (CTs reprennent le site)")
+    @has_allowed_role()
+    async def cs_retake(self, interaction: discord.Interaction):
+        """Mode Retake - nécessite le plugin cs2-retakes."""
+        await interaction.response.defer()
+
+        logger.info(f"User {interaction.user} switching to retake mode")
+
+        try:
+            await self._rcon("mp_warmup_end; css_retakes_enabled 1")
+            await interaction.followup.send(
+                "Mode **Retake** activé.\n"
+                "- CTs reprennent le site\n"
+                "- Équipes aléatoires chaque round"
+            )
+        except RCONAuthError:
+            await interaction.followup.send("RCON authentication failed.")
+        except RCONConnectionError as e:
+            await interaction.followup.send(f"Connection error: {e}")
+        except RCONError as e:
+            await interaction.followup.send(f"RCON error: {e}")
+
+    @cs_group.command(name="ffa", description="Mode FFA Deathmatch (chacun pour soi)")
     @has_allowed_role()
     async def cs_ffa(self, interaction: discord.Interaction):
-        """Passer en mode FFA Deathmatch."""
+        """Mode FFA Deathmatch."""
         await interaction.response.defer()
 
         logger.info(f"User {interaction.user} switching to FFA mode")
 
+        # FFA Deathmatch: free-for-all with respawn
+        commands = [
+            "game_type 1",
+            "game_mode 2",
+            "mp_teammates_are_enemies 1",
+            "mp_autoteambalance 0",
+            "mp_limitteams 0",
+            "mp_buytime 60000",
+            "sv_infinite_ammo 2",
+            "mp_randomspawn 1",
+            "mp_respawn_on_death_ct 1",
+            "mp_respawn_on_death_t 1",
+            "mp_respawnwavetime_ct 1",
+            "mp_respawnwavetime_t 1",
+            "mp_restartgame 1",
+        ]
+
         try:
-            await self._rcon("game_type 1; game_mode 2; mp_teammates_are_enemies 1; mp_restartgame 1")
-            await interaction.followup.send("Mode **FFA Deathmatch** activé.")
+            await self._rcon("; ".join(commands))
+            await interaction.followup.send(
+                "Mode **FFA Deathmatch** activé.\n"
+                "- Chacun pour soi\n"
+                "- Respawn instantané\n"
+                "- Munitions illimitées"
+            )
         except RCONAuthError:
             await interaction.followup.send("RCON authentication failed.")
         except RCONConnectionError as e:
