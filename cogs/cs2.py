@@ -88,17 +88,26 @@ class CS2Commands(commands.Cog):
         workshop_pattern = r"steamcommunity\.com/sharedfiles/filedetails/\?id=(\d+)"
         match = re.search(workshop_pattern, map_name)
 
-        if match:
-            workshop_id = match.group(1)
-            command = f"host_workshop_map {workshop_id}"
-            map_display = f"Workshop map {workshop_id}"
-        else:
-            command = f"changelevel {map_name}"
-            map_display = map_name
-
-        logger.info(f"User {interaction.user} changing map to: {map_display}")
-
         try:
+            if match:
+                workshop_id = match.group(1)
+                command = f"host_workshop_map {workshop_id}"
+                map_display = f"Workshop map {workshop_id}"
+            else:
+                # Validate map exists before changing
+                maps_response = await self._rcon("maps *")
+                available_maps = re.findall(r"(\S+)\.bsp", maps_response.lower())
+
+                if map_name.lower() not in available_maps:
+                    await interaction.followup.send(
+                        self.bot.lang["error_map_not_found"].format(map=map_name)
+                    )
+                    return
+
+                command = f"changelevel {map_name}"
+                map_display = map_name
+
+            logger.info(f"User {interaction.user} changing map to: {map_display}")
             await self._rcon(command)
             await interaction.followup.send(self.bot.lang["map_changing"].format(map=map_display))
         except RCONAuthError:
