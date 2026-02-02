@@ -1,0 +1,17 @@
+{
+  "mode_competitive": "**Competitive** mode activated.",
+  "mode_ffa": "**FFA Deathmatch** mode activated.\n- Free for all\n- Instant respawn\n- Unlimited ammo",
+  "mode_arena": "**Arena** mode activated.\n- No time limit\n- Max money\n- Free armor + helmet",
+  "mode_gungame": "**Arms Race (Gungame)** mode activated.",
+  "mode_retake": "**Retake** mode activated.\n- CTs retake the site\n- Random teams each round",
+  "mode_sandbox": "**Sandbox** mode activated.\n- Unlimited time\n- Unlimited grenades\n- Visible trajectories\n- Impact preview enabled",
+  "map_changing": "Changing map to **{map}**...",
+  "command_executed": "Command executed.",
+  "bots_added": "**{count}** bot(s) added.",
+  "bots_kicked": "All bots kicked.",
+  "bots_difficulty": "Bot difficulty: **{level}**",
+  "error_rcon_auth": "RCON authentication failed.",
+  "error_rcon_connection": "Connection error: {error}",
+  "error_rcon": "RCON error: {error}",
+  "error_no_status": "No status response received."
+}

@@ -1,7 +1,9 @@
 import asyncio
+import json
 import logging
 import re
 import sys
+from pathlib import Path
 
 import discord
 from discord.ext import commands, tasks
@@ -30,6 +32,13 @@ class CS2Bot(commands.Bot):
             intents=intents,
             description="CS2 Server Control Bot"
         )
+
+        # Load language file
+        lang_code = getattr(config, 'LANGUAGE', 'fr')
+        lang_path = Path(__file__).parent / "lang" / f"{lang_code}.json"
+        with open(lang_path, encoding="utf-8") as f:
+            self.lang = json.load(f)
+        logger.info(f"Loaded language: {lang_code}")
 
     async def setup_hook(self):
         # Load the CS2 cog
