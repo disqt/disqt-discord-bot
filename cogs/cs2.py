@@ -96,7 +96,8 @@ class CS2Commands(commands.Cog):
             else:
                 # Validate map exists before changing
                 maps_response = await self._rcon("maps *")
-                available_maps = re.findall(r"(\S+)\.bsp", maps_response.lower())
+                # CS2 returns tab-separated map names without .bsp extension
+                available_maps = [m.strip().lower() for m in maps_response.split() if m.strip()]
 
                 if map_name.lower() not in available_maps:
                     await interaction.followup.send(
