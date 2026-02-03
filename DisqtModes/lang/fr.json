@@ -32,15 +32,8 @@
   "help_title": "=== Commandes disponibles ===",
   "help_modifiers": "Modifiers: !headshot !pistol !vampire !ammo !random",
   "help_bots": "Bots: !bot add [n] [ct|t] | !bot kick [ct|t] | !bot difficulty [0-3]",
-  "help_maps": "Maps: !maps (liste) | !map <nom>",
+  "help_workshop": "Workshop: !workshop <URL ou ID>",
   "help_modes": "Modes: !mode <nom> | !modes (liste)",
 
-  "maps_title": "=== Maps disponibles ===",
-  "maps_defusal": "Defusal",
-  "maps_hostage": "Hostage",
-  "maps_armsrace": "Arms Race",
-  "maps_usage": "Usage: !map <nom ou URL workshop>",
-  "map_changing": "Changement vers {map}...",
-  "map_workshop_loading": "Chargement map Workshop {id}...",
-  "map_not_found": "Map {map} non trouvée. Tape !maps pour la liste."
+  "map_workshop_loading": "Chargement map Workshop {id}..."
 }

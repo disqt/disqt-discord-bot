@@ -24,7 +24,6 @@ public class DisqtModes : BasePlugin
 
     private PluginConfig _config = new();
     private Dictionary<string, string> _lang = new();
-    private List<string> _availableMaps = new();
 
     private bool _headshotOnly = false;
     private bool _pistolOnly = false;
@@ -51,9 +50,8 @@ public class DisqtModes : BasePlugin
     {
         LoadConfig();
         LoadLanguage();
-        LoadMaps();
 
-        Console.WriteLine($"[DisqtModes] Loaded with language: {_config.Language}, {_availableMaps.Count} maps");
+        Console.WriteLine($"[DisqtModes] Loaded with language: {_config.Language}");
 
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
@@ -80,40 +78,6 @@ public class DisqtModes : BasePlugin
         {
             var json = File.ReadAllText(langPath);
             _lang = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new();
-        }
-    }
-
-    private void LoadMaps()
-    {
-        _availableMaps.Clear();
-
-        // CS2 maps directory: game/csgo/maps/
-        // ModuleDirectory is typically: game/csgo/addons/counterstrikesharp/plugins/DisqtModes
-        var gameDir = Path.GetFullPath(Path.Combine(ModuleDirectory, "..", "..", "..", ".."));
-        var mapsDir = Path.Combine(gameDir, "maps");
-
-        if (Directory.Exists(mapsDir))
-        {
-            // Get .vpk files (CS2 map format)
-            var mapFiles = Directory.GetFiles(mapsDir, "*.vpk")
-                .Select(f => Path.GetFileNameWithoutExtension(f))
-                .Where(m => m.StartsWith("de_") || m.StartsWith("cs_") || m.StartsWith("ar_"))
-                .Where(m => !m.EndsWith("_vanity"))
-                .Distinct()
-                .OrderBy(m => m)
-                .ToList();
-
-            _availableMaps.AddRange(mapFiles);
-        }
-
-        // Fallback to default maps if none found
-        if (_availableMaps.Count == 0)
-        {
-            _availableMaps.AddRange(new[] {
-                "de_ancient", "de_anubis", "de_dust2", "de_inferno", "de_mirage",
-                "de_nuke", "de_overpass", "de_train", "de_vertigo",
-                "cs_italy", "cs_office", "ar_baggage", "ar_shoots"
-            });
         }
     }
 
@@ -169,60 +133,29 @@ public class DisqtModes : BasePlugin
         player.PrintToChat($" {L("prefix")} {L("help_title")}");
         player.PrintToChat($" {L("help_modifiers")}");
         player.PrintToChat($" {L("help_bots")}");
-        player.PrintToChat($" {L("help_maps")}");
+        player.PrintToChat($" {L("help_workshop")}");
         player.PrintToChat($" {L("help_modes")}");
     }
 
-    // ========== MAPS ==========
-
-    [ConsoleCommand("css_maps", "List available maps")]
-    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-    public void OnMapsCommand(CCSPlayerController? player, CommandInfo command)
-    {
-        if (player == null || !player.IsValid) return;
-
-        var defusal = _availableMaps.Where(m => m.StartsWith("de_")).ToList();
-        var hostage = _availableMaps.Where(m => m.StartsWith("cs_")).ToList();
-        var armsrace = _availableMaps.Where(m => m.StartsWith("ar_")).ToList();
-
-        player.PrintToChat($" {L("prefix")} {L("maps_title")} ({_availableMaps.Count})");
-
-        if (defusal.Count > 0)
-            player.PrintToChat($" {L("maps_defusal")}: {string.Join(", ", defusal)}");
-        if (hostage.Count > 0)
-            player.PrintToChat($" {L("maps_hostage")}: {string.Join(", ", hostage)}");
-        if (armsrace.Count > 0)
-            player.PrintToChat($" {L("maps_armsrace")}: {string.Join(", ", armsrace)}");
-
-        player.PrintToChat($" {L("maps_usage")}");
-    }
+    // ========== WORKSHOP ==========
 
     private static readonly Regex WorkshopUrlPattern = new(@"steamcommunity\.com/sharedfiles/filedetails/\?id=(\d+)", RegexOptions.Compiled);
 
-    [ConsoleCommand("css_map", "Change map")]
-    [CommandHelper(minArgs: 1, usage: "<mapname or workshop URL>", whoCanExecute: CommandUsage.CLIENT_ONLY)]
-    public void OnMapCommand(CCSPlayerController? player, CommandInfo command)
+    [ConsoleCommand("css_workshop", "Load workshop map by URL or ID")]
+    [CommandHelper(minArgs: 1, usage: "<workshop URL or ID>", whoCanExecute: CommandUsage.CLIENT_ONLY)]
+    public void OnWorkshopCommand(CCSPlayerController? player, CommandInfo command)
     {
         if (player == null || !player.IsValid) return;
 
         var input = command.GetArg(1);
         var workshopMatch = WorkshopUrlPattern.Match(input);
 
-        if (workshopMatch.Success)
-        {
-            var workshopId = workshopMatch.Groups[1].Value;
-            Broadcast(L("map_workshop_loading", ("id", workshopId)));
-            Server.ExecuteCommand($"host_workshop_map {workshopId}");
-        }
-        else if (_availableMaps.Contains(input.ToLower()))
-        {
-            Broadcast(L("map_changing", ("map", input)));
-            Server.ExecuteCommand($"changelevel {input}");
-        }
-        else
-        {
-            player.PrintToChat($" {L("prefix")} {L("map_not_found", ("map", input))}");
-        }
+        string workshopId = workshopMatch.Success
+            ? workshopMatch.Groups[1].Value
+            : input; // Assume raw ID if not URL
+
+        Broadcast(L("map_workshop_loading", ("id", workshopId)));
+        Server.ExecuteCommand($"host_workshop_map {workshopId}");
     }
 
     // ========== MODIFIERS ==========
@@ -301,13 +234,24 @@ public class DisqtModes : BasePlugin
             case "add":
                 int count = 1;
                 string team = "";
+
                 if (command.ArgCount > 2)
                 {
-                    int.TryParse(command.GetArg(2), out count);
-                    count = Math.Clamp(count, 1, 10);
+                    var arg2 = command.GetArg(2).ToLower();
+                    // Check if arg2 is a team name
+                    if (arg2 == "ct" || arg2 == "t")
+                    {
+                        team = arg2;
+                        // count stays at 1
+                    }
+                    else if (int.TryParse(arg2, out int parsedCount))
+                    {
+                        count = Math.Clamp(parsedCount, 1, 10);
+                        // Check for team in arg3
+                        if (command.ArgCount > 3)
+                            team = command.GetArg(3).ToLower();
+                    }
                 }
-                if (command.ArgCount > 3)
-                    team = command.GetArg(3).ToLower();
 
                 for (int i = 0; i < count; i++)
                 {
