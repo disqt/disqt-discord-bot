@@ -14,5 +14,7 @@
   "error_rcon_connection": "Erreur de connexion: {error}",
   "error_rcon": "Erreur RCON: {error}",
   "error_no_status": "Aucune réponse du serveur.",
-  "error_map_not_found": "Map **{map}** introuvable sur le serveur."
+  "error_map_not_found": "Map **{map}** introuvable sur le serveur.",
+  "maps_list": "**Maps disponibles ({count}):**\n```\n{maps}\n```",
+  "maps_none": "Aucune map trouvée."
 }

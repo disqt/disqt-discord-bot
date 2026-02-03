@@ -118,6 +118,34 @@ class CS2Commands(commands.Cog):
         except RCONError as e:
             await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
 
+    @cs_group.command(name="maps", description="Lister les maps disponibles sur le serveur")
+    @has_allowed_role()
+    async def cs_maps(self, interaction: discord.Interaction):
+        """Lister les maps disponibles sur le serveur."""
+        await interaction.response.defer()
+
+        try:
+            maps_response = await self._rcon("maps *")
+            all_maps = [m.strip() for m in maps_response.split() if m.strip()]
+
+            # Filter to only playable maps (de_, cs_, ar_ prefixes)
+            playable_maps = sorted([m for m in all_maps if m.startswith(('de_', 'cs_', 'ar_')) and not m.endswith('_vanity')])
+
+            if playable_maps:
+                maps_list = "\n".join(playable_maps)
+                await interaction.followup.send(
+                    self.bot.lang["maps_list"].format(count=len(playable_maps), maps=maps_list)
+                )
+            else:
+                await interaction.followup.send(self.bot.lang["maps_none"])
+
+        except RCONAuthError:
+            await interaction.followup.send(self.bot.lang["error_rcon_auth"])
+        except RCONConnectionError as e:
+            await interaction.followup.send(self.bot.lang["error_rcon_connection"].format(error=e))
+        except RCONError as e:
+            await interaction.followup.send(self.bot.lang["error_rcon"].format(error=e))
+
     @cs_group.command(name="competitive", description="Passer en mode Compétitif (5v5)")
     @has_allowed_role()
     async def cs_competitive(self, interaction: discord.Interaction):
