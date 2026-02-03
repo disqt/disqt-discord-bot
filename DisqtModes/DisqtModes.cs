@@ -19,7 +19,7 @@ public class PluginConfig
 public class DisqtModes : BasePlugin
 {
     public override string ModuleName => "Disqt Modes";
-    public override string ModuleVersion => "1.2.0";
+    public override string ModuleVersion => "2.0.0";
     public override string ModuleAuthor => "Disqt";
 
     private PluginConfig _config = new();
@@ -43,7 +43,7 @@ public class DisqtModes : BasePlugin
 
     private readonly string[] _tipKeys = {
         "tip_headshot", "tip_pistol", "tip_vampire", "tip_ammo",
-        "tip_modes", "tip_bots", "tip_sandbox", "tip_help", "tip_difficulty"
+        "tip_bots", "tip_help", "tip_difficulty", "tip_modes"
     };
     private int _tipIndex = 0;
 
@@ -167,10 +167,10 @@ public class DisqtModes : BasePlugin
         if (player == null || !player.IsValid) return;
 
         player.PrintToChat($" {L("prefix")} {L("help_title")}");
-        player.PrintToChat($" {L("help_modes")}");
         player.PrintToChat($" {L("help_modifiers")}");
         player.PrintToChat($" {L("help_bots")}");
         player.PrintToChat($" {L("help_maps")}");
+        player.PrintToChat($" {L("help_modes")}");
     }
 
     // ========== MAPS ==========
@@ -289,81 +289,6 @@ public class DisqtModes : BasePlugin
         Broadcast(L(_randomWeapons ? "modifier_random_on" : "modifier_random_off"));
     }
 
-    // ========== GAME MODES ==========
-
-    [ConsoleCommand("css_competitive", "Competitive mode")]
-    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-    public void OnCompetitiveCommand(CCSPlayerController? player, CommandInfo command)
-    {
-        Server.ExecuteCommand("game_type 0; game_mode 1; mp_restartgame 1");
-        Broadcast(L("mode_competitive"));
-    }
-
-    [ConsoleCommand("css_ffa", "FFA Deathmatch")]
-    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-    public void OnFFACommand(CCSPlayerController? player, CommandInfo command)
-    {
-        var cmds = "game_type 1; game_mode 2; " +
-                   // FFA settings
-                   "mp_teammates_are_enemies 1; mp_autoteambalance 0; mp_limitteams 0; " +
-                   // Remove round structure
-                   "mp_freezetime 0; mp_warmuptime 0; mp_roundtime 60; " +
-                   // Instant respawn
-                   "mp_respawn_on_death_ct 1; mp_respawn_on_death_t 1; " +
-                   "mp_respawnwavetime_ct 0; mp_respawnwavetime_t 0; " +
-                   // Buying
-                   "mp_buy_anywhere 1; mp_buytime 60000; " +
-                   "mp_startmoney 16000; mp_maxmoney 16000; mp_afterroundmoney 16000; " +
-                   // Spawns
-                   "mp_randomspawn 1; mp_randomspawn_los 0; " +
-                   // Cheats for infinite ammo
-                   "sv_cheats 1; sv_infinite_ammo 2; " +
-                   "mp_restartgame 1";
-        Server.ExecuteCommand(cmds);
-        Broadcast(L("mode_ffa"));
-    }
-
-    [ConsoleCommand("css_arena", "Arena mode (no time limit)")]
-    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-    public void OnArenaCommand(CCSPlayerController? player, CommandInfo command)
-    {
-        var cmds = "game_type 0; game_mode 1; mp_maxrounds 30; " +
-                   "mp_roundtime 60; mp_roundtime_defuse 60; mp_freezetime 3; " +
-                   "mp_buytime 15; mp_startmoney 16000; mp_maxmoney 16000; " +
-                   "mp_free_armor 2; mp_restartgame 1";
-        Server.ExecuteCommand(cmds);
-        Broadcast(L("mode_arena"));
-    }
-
-    [ConsoleCommand("css_gungame", "Arms Race")]
-    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-    public void OnGungameCommand(CCSPlayerController? player, CommandInfo command)
-    {
-        // Reset conflicting cvars from other modes first
-        var reset = "mp_teammates_are_enemies 0; mp_respawn_on_death_ct 0; mp_respawn_on_death_t 0; " +
-                    "mp_buy_anywhere 0; sv_infinite_ammo 0; mp_randomspawn 0; sv_cheats 0";
-        // Use official Arms Race config for proper weapon progression
-        var cmds = "exec gamemode_armsrace.cfg; game_type 1; game_mode 0; mp_warmuptime 0; mp_restartgame 1";
-        Server.ExecuteCommand(reset);
-        Server.ExecuteCommand(cmds);
-        Broadcast(L("mode_gungame"));
-    }
-
-    [ConsoleCommand("css_sandbox", "Practice/sandbox mode")]
-    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-    public void OnSandboxCommand(CCSPlayerController? player, CommandInfo command)
-    {
-        var cmds = "sv_cheats 1; bot_kick; mp_limitteams 0; mp_autoteambalance 0; " +
-                   "mp_roundtime 60; mp_roundtime_defuse 60; mp_freezetime 0; " +
-                   "mp_warmup_end; sv_infinite_ammo 1; ammo_grenade_limit_total 5; " +
-                   "sv_grenade_trajectory 1; sv_grenade_trajectory_time 10; " +
-                   "sv_grenade_trajectory_prac_pipreview 1; mp_buytime 9999; " +
-                   "mp_buy_anywhere 1; mp_maxmoney 60000; mp_startmoney 60000; " +
-                   "mp_restartgame 1";
-        Server.ExecuteCommand(cmds);
-        Broadcast(L("mode_sandbox"));
-    }
-
     // ========== BOT COMMANDS ==========
 
     [ConsoleCommand("css_bot", "Bot management: add/kick/difficulty")]
@@ -383,9 +308,6 @@ public class DisqtModes : BasePlugin
                 }
                 if (command.ArgCount > 3)
                     team = command.GetArg(3).ToLower();
-
-                // Disable bot quota and fill mode to prevent auto-additions
-                Server.ExecuteCommand("bot_quota 0; bot_quota_mode normal");
 
                 for (int i = 0; i < count; i++)
                 {
@@ -420,10 +342,9 @@ public class DisqtModes : BasePlugin
 
                     // Count existing bots before kicking
                     int botCount = Utilities.GetPlayers().Count(p => p.IsValid && p.IsBot);
-                    Server.ExecuteCommand($"bot_difficulty {cs2Level}; bot_quota_mode normal");
+                    Server.ExecuteCommand($"bot_difficulty {cs2Level}");
                     Server.ExecuteCommand("bot_kick");
                     AddTimer(0.5f, () => {
-                        Server.ExecuteCommand("bot_quota 0; bot_quota_mode normal");
                         // Re-add same number of bots
                         for (int i = 0; i < botCount; i++)
                             Server.ExecuteCommand(i % 2 == 0 ? "bot_add_ct" : "bot_add_t");
