@@ -15,6 +15,8 @@
   "modifier_vampire_off": "Vampire: OFF",
   "modifier_ammo_on": "Infinite ammo: ON",
   "modifier_ammo_off": "Infinite ammo: OFF",
+  "modifier_random_on": "Random weapons: ON",
+  "modifier_random_off": "Random weapons: OFF",
 
   "vampire_heal": "+25 HP (vampire)",
 
@@ -30,13 +32,14 @@
   "tip_bots": "Tip: !bot add 5 adds 5 bots, !bot kick removes them",
   "tip_sandbox": "Tip: !sandbox for grenade practice",
   "tip_help": "Tip: !help to see all commands",
+  "tip_difficulty": "Tip: Bot difficulty 0=pacifist 1=easy 2=normal 3=expert",
 
   "welcome": "Welcome! Type !help to see available commands.",
 
   "help_title": "=== Available commands ===",
   "help_modes": "Modes: !competitive !ffa !arena !gungame !sandbox",
-  "help_modifiers": "Modifiers: !headshot !pistol !vampire !ammo",
-  "help_bots": "Bots: !bot add [n] | !bot kick | !bot difficulty [0-3]",
+  "help_modifiers": "Modifiers: !headshot !pistol !vampire !ammo !random",
+  "help_bots": "Bots: !bot add [n] [ct|t] | !bot kick [ct|t] | !bot difficulty [0-3]",
   "help_maps": "Maps: !maps (list) | !map <name>",
 
   "maps_title": "=== Available maps ===",
