@@ -32,7 +32,7 @@
   "tip_bots": "Astuce: !bot add 5 ajoute 5 bots, !bot kick les vire",
   "tip_sandbox": "Astuce: !sandbox pour t'entraîner aux grenades",
   "tip_help": "Astuce: !help pour voir toutes les commandes",
-  "tip_difficulty": "Astuce: Difficulte bots 0=pacifiste 1=facile 2=normal 3=expert",
+  "tip_difficulty": "Astuce: Difficulte bots 0=facile 1=normal 2=difficile 3=expert",
 
   "welcome": "Bienvenue! Tape !help pour voir les commandes disponibles.",
 
