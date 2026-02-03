@@ -30,10 +30,20 @@ public class DisqtModes : BasePlugin
     private bool _pistolOnly = false;
     private bool _vampireMode = false;
     private bool _infiniteAmmo = false;
+    private bool _randomWeapons = false;
+
+    private static readonly string[] _primaryWeapons = {
+        "weapon_ak47", "weapon_m4a1", "weapon_m4a1_silencer", "weapon_awp",
+        "weapon_famas", "weapon_galilar", "weapon_aug", "weapon_sg556",
+        "weapon_ssg08", "weapon_mac10", "weapon_mp9", "weapon_mp7",
+        "weapon_ump45", "weapon_p90", "weapon_nova", "weapon_xm1014",
+        "weapon_mag7", "weapon_negev", "weapon_m249"
+    };
+    private Random _rng = new();
 
     private readonly string[] _tipKeys = {
         "tip_headshot", "tip_pistol", "tip_vampire", "tip_ammo",
-        "tip_modes", "tip_bots", "tip_sandbox", "tip_help"
+        "tip_modes", "tip_bots", "tip_sandbox", "tip_help", "tip_difficulty"
     };
     private int _tipIndex = 0;
 
@@ -264,8 +274,19 @@ public class DisqtModes : BasePlugin
     {
         if (player == null || !player.IsValid) return;
         _infiniteAmmo = !_infiniteAmmo;
+        // sv_infinite_ammo requires sv_cheats 1 to work
+        Server.ExecuteCommand("sv_cheats 1");
         Server.ExecuteCommand($"sv_infinite_ammo {(_infiniteAmmo ? 2 : 0)}");
         Broadcast(L(_infiniteAmmo ? "modifier_ammo_on" : "modifier_ammo_off"));
+    }
+
+    [ConsoleCommand("css_random", "Toggle random primary weapon on spawn")]
+    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+    public void OnRandomCommand(CCSPlayerController? player, CommandInfo command)
+    {
+        if (player == null || !player.IsValid) return;
+        _randomWeapons = !_randomWeapons;
+        Broadcast(L(_randomWeapons ? "modifier_random_on" : "modifier_random_off"));
     }
 
     // ========== GAME MODES ==========
@@ -282,11 +303,22 @@ public class DisqtModes : BasePlugin
     [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnFFACommand(CCSPlayerController? player, CommandInfo command)
     {
-        var cmds = "game_type 1; game_mode 2; mp_teammates_are_enemies 1; " +
-                   "mp_autoteambalance 0; mp_limitteams 0; mp_buytime 60000; " +
-                   "sv_infinite_ammo 2; mp_randomspawn 1; " +
+        var cmds = "game_type 1; game_mode 2; " +
+                   // FFA settings
+                   "mp_teammates_are_enemies 1; mp_autoteambalance 0; mp_limitteams 0; " +
+                   // Remove round structure
+                   "mp_freezetime 0; mp_warmuptime 0; mp_roundtime 60; " +
+                   // Instant respawn
                    "mp_respawn_on_death_ct 1; mp_respawn_on_death_t 1; " +
-                   "mp_respawnwavetime_ct 1; mp_respawnwavetime_t 1; mp_restartgame 1";
+                   "mp_respawnwavetime_ct 0; mp_respawnwavetime_t 0; " +
+                   // Buying
+                   "mp_buy_anywhere 1; mp_buytime 60000; " +
+                   "mp_startmoney 16000; mp_maxmoney 16000; mp_afterroundmoney 16000; " +
+                   // Spawns
+                   "mp_randomspawn 1; mp_randomspawn_los 0; " +
+                   // Cheats for infinite ammo
+                   "sv_cheats 1; sv_infinite_ammo 2; " +
+                   "mp_restartgame 1";
         Server.ExecuteCommand(cmds);
         Broadcast(L("mode_ffa"));
     }
@@ -307,7 +339,13 @@ public class DisqtModes : BasePlugin
     [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnGungameCommand(CCSPlayerController? player, CommandInfo command)
     {
-        Server.ExecuteCommand("game_type 1; game_mode 0; mp_restartgame 1");
+        // Reset conflicting cvars from other modes first
+        var reset = "mp_teammates_are_enemies 0; mp_respawn_on_death_ct 0; mp_respawn_on_death_t 0; " +
+                    "mp_buy_anywhere 0; sv_infinite_ammo 0; mp_randomspawn 0; " +
+                    "mp_freezetime 0; mp_warmuptime 0";
+        var cmds = "game_type 1; game_mode 0; mp_restartgame 1";
+        Server.ExecuteCommand(reset);
+        Server.ExecuteCommand(cmds);
         Broadcast(L("mode_gungame"));
     }
 
@@ -329,7 +367,7 @@ public class DisqtModes : BasePlugin
     // ========== BOT COMMANDS ==========
 
     [ConsoleCommand("css_bot", "Bot management: add/kick/difficulty")]
-    [CommandHelper(minArgs: 1, usage: "<add|kick|difficulty> [value]", whoCanExecute: CommandUsage.CLIENT_ONLY)]
+    [CommandHelper(minArgs: 1, usage: "<add|kick|difficulty> [value] [ct|t]", whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnBotCommand(CCSPlayerController? player, CommandInfo command)
     {
         var action = command.GetArg(1).ToLower();
@@ -337,20 +375,55 @@ public class DisqtModes : BasePlugin
         {
             case "add":
                 int count = 1;
-                if (command.ArgCount > 2) int.TryParse(command.GetArg(2), out count);
-                count = Math.Clamp(count, 1, 10);
-                for (int i = 0; i < count; i++) Server.ExecuteCommand("bot_add");
-                Broadcast(L("bots_added", ("count", count)));
-                break;
-            case "kick":
-                Server.ExecuteCommand("bot_kick");
-                Broadcast(L("bots_kicked"));
-                break;
-            case "difficulty":
+                string team = "";
                 if (command.ArgCount > 2)
                 {
-                    var level = command.GetArg(2);
+                    int.TryParse(command.GetArg(2), out count);
+                    count = Math.Clamp(count, 1, 10);
+                }
+                if (command.ArgCount > 3)
+                    team = command.GetArg(3).ToLower();
+
+                // Disable bot quota to prevent auto-additions
+                Server.ExecuteCommand("bot_quota 0");
+
+                for (int i = 0; i < count; i++)
+                {
+                    if (team == "ct")
+                        Server.ExecuteCommand("bot_add_ct");
+                    else if (team == "t")
+                        Server.ExecuteCommand("bot_add_t");
+                    else
+                        Server.ExecuteCommand(i % 2 == 0 ? "bot_add_ct" : "bot_add_t");
+                }
+                Broadcast(L("bots_added", ("count", count)));
+                break;
+
+            case "kick":
+                string kickTeam = command.ArgCount > 2 ? command.GetArg(2).ToLower() : "";
+                if (kickTeam == "ct")
+                    Server.ExecuteCommand("bot_kick ct");
+                else if (kickTeam == "t")
+                    Server.ExecuteCommand("bot_kick t");
+                else
+                    Server.ExecuteCommand("bot_kick");
+                Broadcast(L("bots_kicked"));
+                break;
+
+            case "difficulty":
+                if (command.ArgCount > 2 && int.TryParse(command.GetArg(2), out int level))
+                {
+                    level = Math.Clamp(level, 0, 3);
+                    // Count existing bots before kicking
+                    int botCount = Utilities.GetPlayers().Count(p => p.IsValid && p.IsBot);
                     Server.ExecuteCommand($"bot_difficulty {level}");
+                    Server.ExecuteCommand("bot_kick");
+                    AddTimer(0.5f, () => {
+                        Server.ExecuteCommand("bot_quota 0");
+                        // Re-add same number of bots
+                        for (int i = 0; i < botCount; i++)
+                            Server.ExecuteCommand(i % 2 == 0 ? "bot_add_ct" : "bot_add_t");
+                    });
                     Broadcast(L("bots_difficulty", ("level", level)));
                 }
                 break;
@@ -377,10 +450,25 @@ public class DisqtModes : BasePlugin
 
     private HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
     {
-        if (!_pistolOnly) return HookResult.Continue;
         var player = @event.Userid;
         if (player == null || !player.IsValid) return HookResult.Continue;
-        AddTimer(0.1f, () => StripPrimaryWeapon(player));
+
+        // Pistol-only logic
+        if (_pistolOnly)
+        {
+            AddTimer(0.1f, () => StripPrimaryWeapon(player));
+        }
+
+        // Random weapon logic (primary only, keep default pistol)
+        if (_randomWeapons && !_pistolOnly)
+        {
+            AddTimer(0.1f, () => {
+                StripPrimaryWeapon(player);
+                var weapon = _primaryWeapons[_rng.Next(_primaryWeapons.Length)];
+                player.GiveNamedItem(weapon);
+            });
+        }
+
         return HookResult.Continue;
     }
 
