@@ -36,5 +36,14 @@
   "help_title": "=== Available commands ===",
   "help_modes": "Modes: !competitive !ffa !arena !gungame !sandbox",
   "help_modifiers": "Modifiers: !headshot !pistol !vampire !ammo",
-  "help_bots": "Bots: !bot add [n] | !bot kick | !bot difficulty [0-3]"
+  "help_bots": "Bots: !bot add [n] | !bot kick | !bot difficulty [0-3]",
+  "help_maps": "Maps: !maps (list) | !map <name>",
+
+  "maps_title": "=== Available maps ===",
+  "maps_defusal": "Defusal",
+  "maps_hostage": "Hostage",
+  "maps_armsrace": "Arms Race",
+  "maps_usage": "Usage: !map <name> (e.g., !map de_dust2)",
+  "map_changing": "Changing to {map}...",
+  "map_not_found": "Map {map} not found. Type !maps for the list."
 }
