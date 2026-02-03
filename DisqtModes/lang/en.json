@@ -43,7 +43,8 @@
   "maps_defusal": "Defusal",
   "maps_hostage": "Hostage",
   "maps_armsrace": "Arms Race",
-  "maps_usage": "Usage: !map <name> (e.g., !map de_dust2)",
+  "maps_usage": "Usage: !map <name or workshop URL>",
   "map_changing": "Changing to {map}...",
+  "map_workshop_loading": "Loading Workshop map {id}...",
   "map_not_found": "Map {map} not found. Type !maps for the list."
 }

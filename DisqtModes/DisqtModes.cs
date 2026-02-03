@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
@@ -186,21 +187,31 @@ public class DisqtModes : BasePlugin
         player.PrintToChat($" {L("maps_usage")}");
     }
 
+    private static readonly Regex WorkshopUrlPattern = new(@"steamcommunity\.com/sharedfiles/filedetails/\?id=(\d+)", RegexOptions.Compiled);
+
     [ConsoleCommand("css_map", "Change map")]
-    [CommandHelper(minArgs: 1, usage: "<mapname>", whoCanExecute: CommandUsage.CLIENT_ONLY)]
+    [CommandHelper(minArgs: 1, usage: "<mapname or workshop URL>", whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnMapCommand(CCSPlayerController? player, CommandInfo command)
     {
         if (player == null || !player.IsValid) return;
 
-        var mapName = command.GetArg(1).ToLower();
-        if (_availableMaps.Contains(mapName))
+        var input = command.GetArg(1);
+        var workshopMatch = WorkshopUrlPattern.Match(input);
+
+        if (workshopMatch.Success)
         {
-            Broadcast(L("map_changing", ("map", mapName)));
-            Server.ExecuteCommand($"changelevel {mapName}");
+            var workshopId = workshopMatch.Groups[1].Value;
+            Broadcast(L("map_workshop_loading", ("id", workshopId)));
+            Server.ExecuteCommand($"host_workshop_map {workshopId}");
+        }
+        else if (_availableMaps.Contains(input.ToLower()))
+        {
+            Broadcast(L("map_changing", ("map", input)));
+            Server.ExecuteCommand($"changelevel {input}");
         }
         else
         {
-            player.PrintToChat($" {L("prefix")} {L("map_not_found", ("map", mapName))}");
+            player.PrintToChat($" {L("prefix")} {L("map_not_found", ("map", input))}");
         }
     }
 
