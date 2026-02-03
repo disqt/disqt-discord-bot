@@ -341,9 +341,9 @@ public class DisqtModes : BasePlugin
     {
         // Reset conflicting cvars from other modes first
         var reset = "mp_teammates_are_enemies 0; mp_respawn_on_death_ct 0; mp_respawn_on_death_t 0; " +
-                    "mp_buy_anywhere 0; sv_infinite_ammo 0; mp_randomspawn 0; " +
-                    "mp_freezetime 0; mp_warmuptime 0";
-        var cmds = "game_type 1; game_mode 0; mp_restartgame 1";
+                    "mp_buy_anywhere 0; sv_infinite_ammo 0; mp_randomspawn 0; sv_cheats 0";
+        // Use official Arms Race config for proper weapon progression
+        var cmds = "exec gamemode_armsrace.cfg; game_type 1; game_mode 0; mp_warmuptime 0; mp_restartgame 1";
         Server.ExecuteCommand(reset);
         Server.ExecuteCommand(cmds);
         Broadcast(L("mode_gungame"));
@@ -384,8 +384,8 @@ public class DisqtModes : BasePlugin
                 if (command.ArgCount > 3)
                     team = command.GetArg(3).ToLower();
 
-                // Disable bot quota to prevent auto-additions
-                Server.ExecuteCommand("bot_quota 0");
+                // Disable bot quota and fill mode to prevent auto-additions
+                Server.ExecuteCommand("bot_quota 0; bot_quota_mode normal");
 
                 for (int i = 0; i < count; i++)
                 {
@@ -413,13 +413,17 @@ public class DisqtModes : BasePlugin
             case "difficulty":
                 if (command.ArgCount > 2 && int.TryParse(command.GetArg(2), out int level))
                 {
+                    // CS2 bot_difficulty uses 1-5 scale: 1=easy(no shoot), 2=easy, 3=normal, 4=hard, 5=expert
+                    // Map user input 0-3 to CS2 scale 2-5 (skip 1 which makes bots not shoot)
                     level = Math.Clamp(level, 0, 3);
+                    int cs2Level = level + 2; // 0->2, 1->3, 2->4, 3->5
+
                     // Count existing bots before kicking
                     int botCount = Utilities.GetPlayers().Count(p => p.IsValid && p.IsBot);
-                    Server.ExecuteCommand($"bot_difficulty {level}");
+                    Server.ExecuteCommand($"bot_difficulty {cs2Level}; bot_quota_mode normal");
                     Server.ExecuteCommand("bot_kick");
                     AddTimer(0.5f, () => {
-                        Server.ExecuteCommand("bot_quota 0");
+                        Server.ExecuteCommand("bot_quota 0; bot_quota_mode normal");
                         // Re-add same number of bots
                         for (int i = 0; i < botCount; i++)
                             Server.ExecuteCommand(i % 2 == 0 ? "bot_add_ct" : "bot_add_t");
