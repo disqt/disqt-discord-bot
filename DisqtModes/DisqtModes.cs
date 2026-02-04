@@ -346,12 +346,13 @@ public class DisqtModes : BasePlugin
         var pawn = player.PlayerPawn.Value;
         if (pawn?.WeaponServices == null) return;
 
-        foreach (var weapon in pawn.WeaponServices.MyWeapons)
-        {
-            if (weapon.Value == null) continue;
-            var weaponData = weapon.Value.As<CCSWeaponBase>().VData;
-            if (weaponData?.GearSlot == gear_slot_t.GEAR_SLOT_RIFLE)
-                weapon.Value.Remove();
-        }
+        // Collect weapons to remove first to avoid modifying collection during iteration
+        var toRemove = pawn.WeaponServices.MyWeapons
+            .Select(w => w.Value)
+            .Where(w => w != null && w.As<CCSWeaponBase>().VData?.GearSlot == gear_slot_t.GEAR_SLOT_RIFLE)
+            .ToList();
+
+        foreach (var weapon in toRemove)
+            weapon?.Remove();
     }
 }
