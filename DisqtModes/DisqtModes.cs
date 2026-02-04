@@ -29,16 +29,6 @@ public class DisqtModes : BasePlugin
     private bool _pistolOnly = false;
     private bool _vampireMode = false;
     private bool _infiniteAmmo = false;
-    private bool _randomWeapons = false;
-
-    private static readonly string[] _primaryWeapons = {
-        "weapon_ak47", "weapon_m4a1", "weapon_m4a1_silencer", "weapon_awp",
-        "weapon_famas", "weapon_galilar", "weapon_aug", "weapon_sg556",
-        "weapon_ssg08", "weapon_mac10", "weapon_mp9", "weapon_mp7",
-        "weapon_ump45", "weapon_p90", "weapon_nova", "weapon_xm1014",
-        "weapon_mag7", "weapon_negev", "weapon_m249"
-    };
-    private Random _rng = new();
 
     private readonly string[] _tipKeys = {
         "tip_headshot", "tip_pistol", "tip_vampire", "tip_ammo",
@@ -213,15 +203,6 @@ public class DisqtModes : BasePlugin
         Broadcast(L(_infiniteAmmo ? "modifier_ammo_on" : "modifier_ammo_off"));
     }
 
-    [ConsoleCommand("css_random", "Toggle random primary weapon on spawn")]
-    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-    public void OnRandomCommand(CCSPlayerController? player, CommandInfo command)
-    {
-        if (player == null || !player.IsValid) return;
-        _randomWeapons = !_randomWeapons;
-        Broadcast(L(_randomWeapons ? "modifier_random_on" : "modifier_random_off"));
-    }
-
     // ========== BOT COMMANDS ==========
 
     [ConsoleCommand("css_bot", "Bot management: add/kick/difficulty")]
@@ -326,16 +307,6 @@ public class DisqtModes : BasePlugin
         if (_pistolOnly)
         {
             AddTimer(0.1f, () => StripPrimaryWeapon(player));
-        }
-
-        // Random weapon logic (primary only, keep default pistol)
-        if (_randomWeapons && !_pistolOnly)
-        {
-            AddTimer(0.1f, () => {
-                StripPrimaryWeapon(player);
-                var weapon = _primaryWeapons[_rng.Next(_primaryWeapons.Length)];
-                player.GiveNamedItem(weapon);
-            });
         }
 
         return HookResult.Continue;
