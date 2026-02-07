@@ -4,12 +4,24 @@ A Discord bot for controlling a CS2 dedicated server via RCON.
 
 ## Features
 
+### Server Control
 - `/cs exec <command>` - Execute arbitrary RCON commands
-- `/cs map <name_or_workshop_url>` - Change maps (supports Workshop URLs)
-- `/cs 1v1` - Execute 1v1 config
+- `/cs status` - Show server status and connected players
+- `/cs map <name_or_workshop_url>` - Change map (supports map names and Steam Workshop URLs)
+- `/cs maps` - List available playable maps on the server
+
+### Game Modes
+- `/cs competitive` - Switch to Competitive mode (5v5)
+- `/cs arena` - Switch to Arena mode (no time limit, max money, free armor)
+- `/cs gungame` - Switch to Arms Race / Gungame mode
+- `/cs retake` - Switch to Retake mode (CTs retake the site)
+- `/cs ffa` - Switch to FFA Deathmatch (free-for-all with respawn)
+- `/cs sandbox` - Switch to Sandbox/practice mode (infinite time, grenade trajectories)
+
+### Bot Management
 - `/cs bot add [count]` - Add bots (1-10)
 - `/cs bot kick` - Kick all bots
-- `/cs status` - Show server status
+- `/cs bot difficulty <level>` - Set bot difficulty (Easy/Normal/Hard/Expert)
 
 ## Setup
 
@@ -36,7 +48,7 @@ cp .env.example .env
 Edit `.env`:
 ```
 DISCORD_TOKEN=your_discord_bot_token_here
-CS2_RCON_HOST=195.201.114.132
+CS2_RCON_HOST=your_server_ip_here
 CS2_RCON_PORT=27015
 CS2_RCON_PASSWORD=your_rcon_password_here
 ALLOWED_ROLE_NAME=Membres
