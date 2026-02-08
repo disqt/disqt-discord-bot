@@ -37,15 +37,11 @@ All commands are under the `/cs` group and require the configured Discord role.
 | `/cs map <name_or_url>` | Change map (supports map names and Steam Workshop URLs) |
 | `/cs maps` | List available playable maps (de\_, cs\_, ar\_ prefixes) |
 | `/cs status` | Show server status and connected players |
-| `/cs competitive` | Switch to Competitive mode (5v5) |
-| `/cs arena` | Switch to Arena mode (no time limit, max money, free armor) |
-| `/cs gungame` | Switch to Arms Race / Gungame mode |
-| `/cs retake` | Switch to Retake mode (requires cs2-retakes plugin) |
-| `/cs ffa` | Switch to FFA Deathmatch (free-for-all with respawn) |
-| `/cs sandbox` | Switch to Sandbox/practice mode (infinite time, grenade trajectories, buy anywhere) |
 | `/cs bot add [count]` | Add 1-10 bots |
 | `/cs bot kick` | Kick all bots |
 | `/cs bot difficulty <level>` | Set bot difficulty (Facile/Normal/Difficile/Expert) |
+
+Mode switching is handled in-game by **GameModeManager** (`!mode` command), not the Discord bot. The bot previously had `/cs gungame`, `/cs competitive`, etc. but these were removed because they used raw `game_type/game_mode` RCON commands that bypassed GameModeManager and didn't load the correct plugins.
 
 ### Configuration
 
